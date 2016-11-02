@@ -1,0 +1,112 @@
+#!/bin/bash
+
+LOCAL_FOLDER="$HOME/.submit-16b"
+F_SERVER_LOC="$LOCAL_FOLDER/server-loc"
+F_AGREED_TO_LICENSE="$LOCAL_FOLDER/agreed-to-license"
+
+function usage() {
+    echo "Usage: submit-16b [clean | hw N | grades N]"
+    clean 1
+}
+
+function check-exists() {
+    if [ ! -f $1 ]; then
+        echo "file $1 not found!"
+        clean 1
+    fi
+}
+
+function clean() {
+    if [ "$TO_REMOVE" ]; then
+        rm $TO_REMOVE
+    fi
+    unset PASSWORD
+    exit "$@"
+}
+
+if [ "$1" == "clean" ]; then
+    if [ ! -e "$LOCAL_FOLDER" ]; then
+        clean 0
+    fi
+    rm -r "$LOCAL_FOLDER"
+    clean 0
+fi
+
+mkdir -p "$LOCAL_FOLDER"
+
+if [ ! -f "$F_AGREED_TO_LICENSE" ]; then
+    echo "submit-16 by Kavi Gupta"
+    echo "License Terms:"
+    echo "          THIS SOFTWARE IS PROVIDED BY KAVI GUPTA AS IS AND WITHOUT ANY WARRANTIES."
+    echo "          IN NO EVENT SHALL KAVI GUPTA BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,"
+    echo "          SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE"
+    echo "          USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+    read -p "Agree to terms? [y/N] " agreed_to_license
+    case "$agreed_to_license" in
+        y|Y ) touch "$F_AGREED_TO_LICENSE";;
+        * ) echo "Goodbye!"; clean 1;;
+    esac
+fi
+
+while [ ! -f "$F_SERVER_LOC" ]; do
+    read -p "What is the ssh target? " serveloc
+    read -p "Confirm: " serveloc_confirm
+    if [ "$serveloc" == "$serveloc_confirm" ]; then
+        echo "$serveloc" > "$F_SERVER_LOC";
+    else
+        echo "Server locations do not match"
+    fi
+done
+
+SERVELOC=`cat $F_SERVER_LOC`
+
+FILES=""
+ASSIGN=""
+
+if [ "$1" == "hw" ]; then
+    FILES="hw$2.pdf"
+    ASSIGN="$1$2"
+    check-exists "$FILES"
+    if [ -f "hw$2.ipynb" ]; then
+        FILES="$FILES hw$2.ipynb"
+    elif [ -f "prob$2.ipynb" ]; then
+        cp "prob$2.ipynb" "hw$2.ipynb"
+        TO_REMOVE="$TO_REMOVE hw$2.ipynb"
+        FILES="$FILES hw$2.ipynb"
+    fi
+elif [ "$1" == "grades" ]; then
+    ASSIGN="hw$2_grades"
+    FILES="hw$2_grades.txt"
+else
+    usage
+fi
+ 
+read -s -p "Password: " PASSWORD
+echo
+
+for f in $FILES; do
+    echo "Copying $f to the server '$SERVELOC'"
+    sshpass -p "$PASSWORD" rsync -r -v --progress -e ssh $f "$SERVELOC:"
+done
+
+sshpass -p "$PASSWORD" ssh "$SERVELOC" "mkdir -p $ASSIGN; for f in $FILES; do mv \$f $ASSIGN; done; cd $ASSIGN; submit $ASSIGN || exit 42; cksum $FILES | awk '{ print \$1 }' > ~/sum; glookup -t; exit 0"
+
+ERROR=$?
+
+sshpass -p "$PASSWORD" scp "$SERVELOC:~/sum" "$LOCAL_FOLDER/sum"
+
+theirsum=`cat $LOCAL_FOLDER/sum`
+oursum=`cksum $FILES | awk '{ print $1 }'`
+
+if [ "0" != "$ERROR" ]; then
+    echo "Submission Failed! See above for reasons."
+    clean $ERROR
+fi
+
+if [ $oursum != $theirsum ]; then
+    echo "$oursum != $theirsum"
+    echo "Submission Failed due to different checksums! Check your internet connection?"
+    clean 50
+fi
+
+clean 0
