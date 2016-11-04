@@ -24,6 +24,34 @@ function clean() {
     exit "$@"
 }
 
+function convert-ipynb() {
+    if [ $# != "2" ]; then
+        echo "Usage: convert-ipynb <ipython file> <output name>"
+        return 1
+    fi
+
+    ORIGINAL="$1"
+    OUTPUT="$2"
+    if [ -f "$OUTPUT.ipynb" ] || [ -f "$OUTPUT.pdf" ] || [ -f "$OUTPUT.html" ]; then
+        echo "Try a different output name to avoid clobbering."
+        return 1
+    fi
+    
+    cp "$ORIGINAL" "$OUTPUT.ipynb"
+    ipython nbconvert --to pdf "$OUTPUT.ipynb" >/dev/null
+    WORKED=$?
+    
+    if [ ! WORKED ]; then
+        echo "Consider Installing pdflatex for prettier output"
+        ipython nbconvert --to html "$1" >/dev/null
+        wkhtmltopdf "$OUTPUT.html" "$OUTPUT.pdf" >/dev/null
+        rm "$OUTPUT.html"
+    else
+        rm -rf "${OUTPUT}_files"
+    fi
+    rm "$OUTPUT.ipynb"
+}
+
 if [ "$1" == "clean" ]; then
     if [ ! -e "$LOCAL_FOLDER" ]; then
         clean 0
