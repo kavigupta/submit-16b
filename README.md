@@ -9,13 +9,13 @@ Submitting EE assignments through `ssh` and `glookup` can often be tedious. Howe
  - Calls `glookup -t` so you can check that the assignment was in fact submitted
  - Resets everything on your computer back to how it was, saving the submission pdf as `-final-submission.pdf` if it was modified
 
-You can check the result of the merging process by looking at the `-final-submission.pdf`. `submit-16b` is your one-stop shop for submitting EE16* assignments!
+You can check the result of the merging process by looking at the `-final-submission.pdf`. `submit-16b` is your one-stop shop for submitting EE16A and EE16B assignments!
 
 # Usage Examples
 
 `submit-16b` has a fairly simple interface. To submit a Homework 9, run
 
-```
+```sh
 ./submit-16b hw 9
 ```
 
@@ -23,13 +23,20 @@ in the folder containing the files for submission (which must have the names `hw
 
 To submit the self-grade for homework 9, run
 
-```
+```sh
 ./submit-16b grades 9
 ```
 
 in the folder containing the file `hw9_grades.txt`.
 
 The first time you run `submit-16b` you will be prompted for information regarding your server. However, this is stored and you won't be asked for it again. You will, however, be asked to confirm files to submit every time, this makes sure you know what is being submitted.
+
+If you would like to submit to a different server, run
+
+```sh
+./submit-16b clean
+./submit-16b hw 9
+```
 
 # Bug Reports
 
