@@ -1,7 +1,0 @@
-#!/bin/bash
-
-
-
-convert-ipynb "$@"
-
- </dev/urandom | tr -dc 'A-Z0-9a-z' | head -c 50
