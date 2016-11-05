@@ -16,7 +16,15 @@ function check-exists() {
     fi
 }
 
+HOMEWORK_PDF="hw$2.pdf"
+HOMEWORK_PDF_BACKUP="hw$2.bak.pdf"
+HOMEWORK_PDF_SUBMIT="hw$2-final-submission.pdf"
+
 function clean() {
+    if [ "$IPYTHON" == "true" ]; then
+        mv "$HOMEWORK_PDF" "$HOMEWORK_PDF_SUBMIT"
+        mv "$HOMEWORK_PDF_BACKUP" "$HOMEWORK_PDF"
+    fi
     if [ "$TO_REMOVE" ]; then
         rm $TO_REMOVE
     fi
@@ -33,7 +41,7 @@ function convert-ipynb() {
     ORIGINAL="$1"
     OUTPUT="$2"
     if [ -f "$OUTPUT.ipynb" ] || [ -f "$OUTPUT.pdf" ] || [ -f "$OUTPUT.html" ]; then
-        echo "Try a different output name to avoid clobbering."
+        echo "Try a different output name to avoid clobbering ($OUTPUT is taken)."
         return 1
     fi
     
@@ -96,11 +104,20 @@ if [ "$1" == "hw" ]; then
     ASSIGN="$1$2"
     check-exists "$FILES"
     if [ -f "hw$2.ipynb" ]; then
+        IPYTHON="true"
         FILES="$FILES hw$2.ipynb"
     elif [ -f "prob$2.ipynb" ]; then
+        IPYTHON="true"
         cp "prob$2.ipynb" "hw$2.ipynb"
         TO_REMOVE="$TO_REMOVE hw$2.ipynb"
         FILES="$FILES hw$2.ipynb"
+    fi
+    if [ "$IPYTHON" == "true" ]; then
+         OUTPUT=`cat /dev/urandom | tr -dc 'A-Z0-9a-z' | head -c 50`
+         mv "hw$2.pdf" "hw$2.bak.pdf"
+         convert-ipynb "hw$2.ipynb" "$OUTPUT"
+         pdftk "hw$2.bak.pdf" "$OUTPUT.pdf" cat output "hw$2.pdf"
+         rm "$OUTPUT.pdf"
     fi
 elif [ "$1" == "grades" ]; then
     ASSIGN="hw$2_grades"
