@@ -84,10 +84,10 @@ function setup() {
     if [ ! -f "$F_AGREED_TO_LICENSE" ]; then
         echo "submit-16 by Kavi Gupta"
         echo "License Terms:"
-        echo "          THIS SOFTWARE IS PROVIDED BY KAVI GUPTA AS IS AND WITHOUT ANY WARRANTIES."
-        echo "          IN NO EVENT SHALL KAVI GUPTA BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,"
-        echo "          SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE"
-        echo "          USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+        echo "    THIS SOFTWARE IS PROVIDED BY KAVI GUPTA AS IS AND WITHOUT ANY WARRANTIES."
+        echo "    IN NO EVENT SHALL KAVI GUPTA BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,"
+        echo "    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE"
+        echo "    USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
         read -p "Agree to terms? [y/N] " agreed_to_license
         case "$agreed_to_license" in
             y|Y ) touch "$F_AGREED_TO_LICENSE";;
