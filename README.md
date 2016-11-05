@@ -1,14 +1,15 @@
 # Submit-16B
 
-Submitting EE assignments through `ssh` and `glookup` can often be tedious. However, there is an easier way. `submit-16b` is a simpler way to submit documents. In one command, `submit-16b` does the following:
+Submitting EE assignments through `ssh` and `glookup` can often be tedious. However, there is an easier way: `submit-16b`. In one command, `submit-16b` does the following:
 
  - Checks to see if the appropriate files exist
- - Converts the `.ipynb` to a `.pdf` and tacks it onto the end of the existing `.pdf`
- - Copies the `.pdf` and `.ipynb` files to the server, and places them in a folder
+ - Converts the `.ipynb` to a `.pdf` and tacks it onto the end of the existing `.pdf` (if applicable)
+ - Copies the submission files to the server, and places them in a folder
  - `submit`s the files on the server
  - Calls `glookup -t` so you can check that the assignment was in fact submitted
+ - Resets everything on your computer back to how it was, saving the submission pdf as `-final-submission.pdf` if it was modified
 
-You can check the result of the merging process by looking at the `-final-submission.pdf`
+You can check the result of the merging process by looking at the `-final-submission.pdf`. `submit-16b` is your one-stop shop for submitting EE16* assignments!
 
 # Usage Examples
 
