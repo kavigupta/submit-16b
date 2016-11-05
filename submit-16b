@@ -34,7 +34,7 @@ function main() {
             FILES="$FILES hw$2.ipynb"
         fi
         if [ "$IPYTHON" == "true" ]; then
-             OUTPUT="$DOCUMENT_NAME" #`cat /dev/urandom | tr -dc 'A-Z0-9a-z' | head -c 50`
+             OUTPUT="$DOCUMENT_NAME"
              mv "hw$2.pdf" "hw$2.bak.pdf"
              convert-ipynb "hw$2.ipynb" "$OUTPUT"
              pdftk "hw$2.bak.pdf" "$OUTPUT.pdf" cat output "hw$2.pdf"
@@ -136,8 +136,8 @@ function convert-ipynb() {
         return 1
     fi
 
-    ORIGINAL="$1"
-    OUTPUT="$2"
+    local ORIGINAL="$1"
+    local OUTPUT="$2"
     if [ -f "$OUTPUT.ipynb" ] || [ -f "$OUTPUT.pdf" ] || [ -f "$OUTPUT.html" ]; then
         echo "Try a different output name to avoid clobbering ($OUTPUT is taken)."
         return 1
@@ -145,7 +145,7 @@ function convert-ipynb() {
     
     cp "$ORIGINAL" "$OUTPUT.ipynb"
     ipython nbconvert --to pdf "$OUTPUT.ipynb" >/dev/null
-    WORKED=$?
+    local WORKED=$?
     
     if [ ! WORKED ]; then
         echo "Consider Installing pdflatex for prettier output"
