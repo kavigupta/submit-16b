@@ -20,6 +20,8 @@ HOMEWORK_PDF="hw$2.pdf"
 HOMEWORK_PDF_BACKUP="hw$2.bak.pdf"
 HOMEWORK_PDF_SUBMIT="hw$2-final-submission.pdf"
 
+DOCUMENT_NAME="Homework $2"
+
 function clean() {
     if [ "$IPYTHON" == "true" ]; then
         mv "$HOMEWORK_PDF" "$HOMEWORK_PDF_SUBMIT"
@@ -113,7 +115,7 @@ if [ "$1" == "hw" ]; then
         FILES="$FILES hw$2.ipynb"
     fi
     if [ "$IPYTHON" == "true" ]; then
-         OUTPUT=`cat /dev/urandom | tr -dc 'A-Z0-9a-z' | head -c 50`
+         OUTPUT="$DOCUMENT_NAME" #`cat /dev/urandom | tr -dc 'A-Z0-9a-z' | head -c 50`
          mv "hw$2.pdf" "hw$2.bak.pdf"
          convert-ipynb "hw$2.ipynb" "$OUTPUT"
          pdftk "hw$2.bak.pdf" "$OUTPUT.pdf" cat output "hw$2.pdf"
