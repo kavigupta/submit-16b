@@ -33,3 +33,9 @@ The first time you run `submit-16b` you will be prompted for information regardi
 # Bug Reports
 
 If you encounter a bug with this software, please email me at my Berkeley email (`kavi` at Berkeley) or file an issue on Github.
+
+# License
+
+(Ever wondered why the BSD License is always in shouty-case? Never understood it myself.)
+
+THIS SOFTWARE IS PROVIDED BY KAVI GUPTA AS IS AND WITHOUT ANY WARRANTIES. IN NO EVENT SHALL KAVI GUPTA BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
