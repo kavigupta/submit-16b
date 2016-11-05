@@ -19,6 +19,66 @@ function main() {
         clean 0
     fi
     setup
+    SERVELOC=`cat $F_SERVER_LOC`
+    FILES=""
+    ASSIGN=""
+
+    if [ "$1" == "hw" ]; then
+        FILES="hw$2.pdf"
+        ASSIGN="$1$2"
+        check-exists "$FILES"
+        if [ -f "hw$2.ipynb" ]; then
+            IPYTHON="true"
+            FILES="$FILES hw$2.ipynb"
+        elif [ -f "prob$2.ipynb" ]; then
+            IPYTHON="true"
+            cp "prob$2.ipynb" "hw$2.ipynb"
+            TO_REMOVE="$TO_REMOVE hw$2.ipynb"
+            FILES="$FILES hw$2.ipynb"
+        fi
+        if [ "$IPYTHON" == "true" ]; then
+             OUTPUT="$DOCUMENT_NAME" #`cat /dev/urandom | tr -dc 'A-Z0-9a-z' | head -c 50`
+             mv "hw$2.pdf" "hw$2.bak.pdf"
+             convert-ipynb "hw$2.ipynb" "$OUTPUT"
+             pdftk "hw$2.bak.pdf" "$OUTPUT.pdf" cat output "hw$2.pdf"
+             rm "$OUTPUT.pdf"
+        fi
+    elif [ "$1" == "grades" ]; then
+        ASSIGN="hw$2_grades"
+        FILES="hw$2_grades.txt"
+    else
+        usage
+    fi
+     
+    read -s -p "Password: " PASSWORD
+    echo
+
+    for f in $FILES; do
+        echo "Copying $f to the server '$SERVELOC'"
+        sshpass -p "$PASSWORD" rsync -r -v --progress -e ssh $f "$SERVELOC:"
+    done
+
+    sshpass -p "$PASSWORD" ssh "$SERVELOC" "mkdir -p $ASSIGN; for f in $FILES; do mv \$f $ASSIGN; done; cd $ASSIGN; submit $ASSIGN || exit 42; cksum $FILES | awk '{ print \$1 }' > ~/sum; glookup -t; exit 0"
+
+    ERROR=$?
+
+    sshpass -p "$PASSWORD" scp "$SERVELOC:~/sum" "$LOCAL_FOLDER/sum"
+
+    theirsum=`cat $LOCAL_FOLDER/sum`
+    oursum=`cksum $FILES | awk '{ print $1 }'`
+
+    if [ "0" != "$ERROR" ]; then
+        echo "Submission Failed! See above for reasons."
+        clean $ERROR
+    fi
+
+    if [ $oursum != $theirsum ]; then
+        echo "$oursum != $theirsum"
+        echo "Submission Failed due to different checksums! Check your internet connection?"
+        clean 50
+    fi
+
+    clean 0
 }
 
 function setup() {
@@ -47,8 +107,6 @@ function setup() {
             echo "Server locations do not match"
         fi
     done
-
-    SERVELOC=`cat $F_SERVER_LOC`
 }
 
 function usage() {
@@ -103,64 +161,4 @@ function convert-ipynb() {
     rm "$OUTPUT.ipynb"
 }
 
-main
-
-FILES=""
-ASSIGN=""
-
-if [ "$1" == "hw" ]; then
-    FILES="hw$2.pdf"
-    ASSIGN="$1$2"
-    check-exists "$FILES"
-    if [ -f "hw$2.ipynb" ]; then
-        IPYTHON="true"
-        FILES="$FILES hw$2.ipynb"
-    elif [ -f "prob$2.ipynb" ]; then
-        IPYTHON="true"
-        cp "prob$2.ipynb" "hw$2.ipynb"
-        TO_REMOVE="$TO_REMOVE hw$2.ipynb"
-        FILES="$FILES hw$2.ipynb"
-    fi
-    if [ "$IPYTHON" == "true" ]; then
-         OUTPUT="$DOCUMENT_NAME" #`cat /dev/urandom | tr -dc 'A-Z0-9a-z' | head -c 50`
-         mv "hw$2.pdf" "hw$2.bak.pdf"
-         convert-ipynb "hw$2.ipynb" "$OUTPUT"
-         pdftk "hw$2.bak.pdf" "$OUTPUT.pdf" cat output "hw$2.pdf"
-         rm "$OUTPUT.pdf"
-    fi
-elif [ "$1" == "grades" ]; then
-    ASSIGN="hw$2_grades"
-    FILES="hw$2_grades.txt"
-else
-    usage
-fi
- 
-read -s -p "Password: " PASSWORD
-echo
-
-for f in $FILES; do
-    echo "Copying $f to the server '$SERVELOC'"
-    sshpass -p "$PASSWORD" rsync -r -v --progress -e ssh $f "$SERVELOC:"
-done
-
-sshpass -p "$PASSWORD" ssh "$SERVELOC" "mkdir -p $ASSIGN; for f in $FILES; do mv \$f $ASSIGN; done; cd $ASSIGN; submit $ASSIGN || exit 42; cksum $FILES | awk '{ print \$1 }' > ~/sum; glookup -t; exit 0"
-
-ERROR=$?
-
-sshpass -p "$PASSWORD" scp "$SERVELOC:~/sum" "$LOCAL_FOLDER/sum"
-
-theirsum=`cat $LOCAL_FOLDER/sum`
-oursum=`cksum $FILES | awk '{ print $1 }'`
-
-if [ "0" != "$ERROR" ]; then
-    echo "Submission Failed! See above for reasons."
-    clean $ERROR
-fi
-
-if [ $oursum != $theirsum ]; then
-    echo "$oursum != $theirsum"
-    echo "Submission Failed due to different checksums! Check your internet connection?"
-    clean 50
-fi
-
-clean 0
+main "$@"
