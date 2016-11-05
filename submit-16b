@@ -12,10 +12,7 @@ DOCUMENT_NAME="Homework $2"
 
 function main() {
     if [ "$1" == "clean" ]; then
-        if [ ! -e "$LOCAL_FOLDER" ]; then
-            clean 0
-        fi
-        rm -r "$LOCAL_FOLDER"
+        rm -rf "$LOCAL_FOLDER"
         clean 0
     fi
     setup
