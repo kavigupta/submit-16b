@@ -4,6 +4,53 @@ LOCAL_FOLDER="$HOME/.submit-16b"
 F_SERVER_LOC="$LOCAL_FOLDER/server-loc"
 F_AGREED_TO_LICENSE="$LOCAL_FOLDER/agreed-to-license"
 
+HOMEWORK_PDF="hw$2.pdf"
+HOMEWORK_PDF_BACKUP="hw$2.bak.pdf"
+HOMEWORK_PDF_SUBMIT="hw$2-final-submission.pdf"
+
+DOCUMENT_NAME="Homework $2"
+
+function main() {
+    if [ "$1" == "clean" ]; then
+        if [ ! -e "$LOCAL_FOLDER" ]; then
+            clean 0
+        fi
+        rm -r "$LOCAL_FOLDER"
+        clean 0
+    fi
+    setup
+}
+
+function setup() {
+    mkdir -p "$LOCAL_FOLDER"
+
+    if [ ! -f "$F_AGREED_TO_LICENSE" ]; then
+        echo "submit-16 by Kavi Gupta"
+        echo "License Terms:"
+        echo "          THIS SOFTWARE IS PROVIDED BY KAVI GUPTA AS IS AND WITHOUT ANY WARRANTIES."
+        echo "          IN NO EVENT SHALL KAVI GUPTA BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,"
+        echo "          SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE"
+        echo "          USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+        read -p "Agree to terms? [y/N] " agreed_to_license
+        case "$agreed_to_license" in
+            y|Y ) touch "$F_AGREED_TO_LICENSE";;
+            * ) echo "Goodbye!"; clean 1;;
+        esac
+    fi
+
+    while [ ! -f "$F_SERVER_LOC" ]; do
+        read -p "What is the ssh target? " serveloc
+        read -p "Confirm: " serveloc_confirm
+        if [ "$serveloc" == "$serveloc_confirm" ]; then
+            echo "$serveloc" > "$F_SERVER_LOC";
+        else
+            echo "Server locations do not match"
+        fi
+    done
+
+    SERVELOC=`cat $F_SERVER_LOC`
+}
+
 function usage() {
     echo "Usage: submit-16b [clean | hw N | grades N]"
     clean 1
@@ -15,12 +62,6 @@ function check-exists() {
         clean 1
     fi
 }
-
-HOMEWORK_PDF="hw$2.pdf"
-HOMEWORK_PDF_BACKUP="hw$2.bak.pdf"
-HOMEWORK_PDF_SUBMIT="hw$2-final-submission.pdf"
-
-DOCUMENT_NAME="Homework $2"
 
 function clean() {
     if [ "$IPYTHON" == "true" ]; then
@@ -62,41 +103,7 @@ function convert-ipynb() {
     rm "$OUTPUT.ipynb"
 }
 
-if [ "$1" == "clean" ]; then
-    if [ ! -e "$LOCAL_FOLDER" ]; then
-        clean 0
-    fi
-    rm -r "$LOCAL_FOLDER"
-    clean 0
-fi
-
-mkdir -p "$LOCAL_FOLDER"
-
-if [ ! -f "$F_AGREED_TO_LICENSE" ]; then
-    echo "submit-16 by Kavi Gupta"
-    echo "License Terms:"
-    echo "          THIS SOFTWARE IS PROVIDED BY KAVI GUPTA AS IS AND WITHOUT ANY WARRANTIES."
-    echo "          IN NO EVENT SHALL KAVI GUPTA BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,"
-    echo "          SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE"
-    echo "          USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-    read -p "Agree to terms? [y/N] " agreed_to_license
-    case "$agreed_to_license" in
-        y|Y ) touch "$F_AGREED_TO_LICENSE";;
-        * ) echo "Goodbye!"; clean 1;;
-    esac
-fi
-
-while [ ! -f "$F_SERVER_LOC" ]; do
-    read -p "What is the ssh target? " serveloc
-    read -p "Confirm: " serveloc_confirm
-    if [ "$serveloc" == "$serveloc_confirm" ]; then
-        echo "$serveloc" > "$F_SERVER_LOC";
-    else
-        echo "Server locations do not match"
-    fi
-done
-
-SERVELOC=`cat $F_SERVER_LOC`
+main
 
 FILES=""
 ASSIGN=""
