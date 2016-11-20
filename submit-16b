@@ -69,7 +69,7 @@ function main() {
         clean $ERROR
     fi
 
-    if [ $oursum != $theirsum ]; then
+    if [ "$oursum" != "$theirsum" ]; then
         echo "$oursum != $theirsum"
         echo "Submission Failed due to different checksums! Check your internet connection?"
         clean 50
